@@ -1,5 +1,5 @@
 <img src="https://github.com/2016jyy/create_k8s_cluster/raw/master/logo/logo.png" width="100"/>
-<br/>
+----
 # 安装k8s集群
 ## 集群方案
 * 发行版： CentOS 7
