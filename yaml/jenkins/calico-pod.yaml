@@ -1,0 +1,275 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    scheduler.alpha.kubernetes.io/critical-pod: ""
+  creationTimestamp: "2019-04-25T09:59:35Z"
+  generateName: calico-node-
+  labels:
+    controller-revision-hash: 59bc9b568
+    k8s-app: calico-node
+    pod-template-generation: "1"
+  name: calico-node-bfvjq
+  namespace: kube-system
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: DaemonSet
+    name: calico-node
+    uid: ccb3a2ad-6740-11e9-ac80-fa163e515076
+  resourceVersion: "536799"
+  selfLink: /api/v1/namespaces/kube-system/pods/calico-node-bfvjq
+  uid: d4d2cd96-6740-11e9-ac80-fa163e515076
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchFields:
+          - key: metadata.name
+            operator: In
+            values:
+            - k8s1.novalocal
+  containers:
+  - env:
+    - name: DATASTORE_TYPE
+      value: kubernetes
+    - name: WAIT_FOR_DATASTORE
+      value: "true"
+    - name: NODENAME
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: spec.nodeName
+    - name: CALICO_NETWORKING_BACKEND
+      valueFrom:
+        configMapKeyRef:
+          key: calico_backend
+          name: calico-config
+    - name: CLUSTER_TYPE
+      value: k8s,bgp
+    - name: IP
+      value: autodetect
+    - name: IP_AUTODETECTION_METHOD
+      value: can-reach=10.99.44.166
+    - name: CALICO_IPV4POOL_IPIP
+      value: Always
+    - name: FELIX_IPINIPMTU
+      valueFrom:
+        configMapKeyRef:
+          key: veth_mtu
+          name: calico-config
+    - name: CALICO_IPV4POOL_CIDR
+      value: 10.244.0.0/16
+    - name: CALICO_DISABLE_FILE_LOGGING
+      value: "true"
+    - name: FELIX_DEFAULTENDPOINTTOHOSTACTION
+      value: ACCEPT
+    - name: FELIX_IPV6SUPPORT
+      value: "false"
+    - name: FELIX_LOGSEVERITYSCREEN
+      value: info
+    - name: FELIX_HEALTHENABLED
+      value: "true"
+    image: quay.io/calico/node:v3.5.3
+    imagePullPolicy: IfNotPresent
+    livenessProbe:
+      failureThreshold: 6
+      httpGet:
+        host: localhost
+        path: /liveness
+        port: 9099
+        scheme: HTTP
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 1
+    name: calico-node
+    readinessProbe:
+      exec:
+        command:
+        - /bin/calico-node
+        - -bird-ready
+        - -felix-ready
+      failureThreshold: 3
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 1
+    resources:
+      requests:
+        cpu: 250m
+    securityContext:
+      privileged: true
+      procMount: Default
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /lib/modules
+      name: lib-modules
+      readOnly: true
+    - mountPath: /run/xtables.lock
+      name: xtables-lock
+    - mountPath: /var/run/calico
+      name: var-run-calico
+    - mountPath: /var/lib/calico
+      name: var-lib-calico
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: calico-node-token-9pg2z
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  hostNetwork: true
+  initContainers:
+  - command:
+    - /install-cni.sh
+    env:
+    - name: CNI_CONF_NAME
+      value: 10-calico.conflist
+    - name: CNI_NETWORK_CONFIG
+      valueFrom:
+        configMapKeyRef:
+          key: cni_network_config
+          name: calico-config
+    - name: KUBERNETES_NODE_NAME
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: spec.nodeName
+    - name: CNI_MTU
+      valueFrom:
+        configMapKeyRef:
+          key: veth_mtu
+          name: calico-config
+    - name: SLEEP
+      value: "false"
+    image: quay.io/calico/cni:v3.5.3
+    imagePullPolicy: IfNotPresent
+    name: install-cni
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /host/opt/cni/bin
+      name: cni-bin-dir
+    - mountPath: /host/etc/cni/net.d
+      name: cni-net-dir
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: calico-node-token-9pg2z
+      readOnly: true
+  nodeName: k8s1.novalocal
+  nodeSelector:
+    beta.kubernetes.io/os: linux
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: calico-node
+  serviceAccountName: calico-node
+  terminationGracePeriodSeconds: 0
+  tolerations:
+  - effect: NoSchedule
+    operator: Exists
+  - key: CriticalAddonsOnly
+    operator: Exists
+  - effect: NoExecute
+    operator: Exists
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+  - effect: NoSchedule
+    key: node.kubernetes.io/disk-pressure
+    operator: Exists
+  - effect: NoSchedule
+    key: node.kubernetes.io/memory-pressure
+    operator: Exists
+  - effect: NoSchedule
+    key: node.kubernetes.io/pid-pressure
+    operator: Exists
+  - effect: NoSchedule
+    key: node.kubernetes.io/unschedulable
+    operator: Exists
+  - effect: NoSchedule
+    key: node.kubernetes.io/network-unavailable
+    operator: Exists
+  volumes:
+  - hostPath:
+      path: /lib/modules
+      type: ""
+    name: lib-modules
+  - hostPath:
+      path: /var/run/calico
+      type: ""
+    name: var-run-calico
+  - hostPath:
+      path: /var/lib/calico
+      type: ""
+    name: var-lib-calico
+  - hostPath:
+      path: /run/xtables.lock
+      type: FileOrCreate
+    name: xtables-lock
+  - hostPath:
+      path: /opt/cni/bin
+      type: ""
+    name: cni-bin-dir
+  - hostPath:
+      path: /etc/cni/net.d
+      type: ""
+    name: cni-net-dir
+  - name: calico-node-token-9pg2z
+    secret:
+      defaultMode: 420
+      secretName: calico-node-token-9pg2z
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2019-04-25T09:59:38Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2019-04-30T03:38:28Z"
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2019-04-30T03:38:28Z"
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2019-04-25T09:59:35Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: docker://93e8b535afc66edd65bcaacb424ee0b5d7bf989512069fb3310b380915318109
+    image: quay.io/calico/node:v3.5.3
+    imageID: docker-pullable://quay.io/calico/node@sha256:eed1ff2f94951c2e9e917c191f3bed5858fe190fec93d7fa7788c156eb2aabe1
+    lastState: {}
+    name: calico-node
+    ready: true
+    restartCount: 0
+    state:
+      running:
+        startedAt: "2019-04-25T09:59:39Z"
+  hostIP: 10.99.44.166
+  initContainerStatuses:
+  - containerID: docker://dbffe73bc7d27a5859bb840d22621472b03c85f9eb12aca94824304c74eef882
+    image: quay.io/calico/cni:v3.5.3
+    imageID: docker-pullable://quay.io/calico/cni@sha256:b3bafa2253a8000aa638d3ee54b9e61cc02ebe42babc36bfc471b669524659de
+    lastState: {}
+    name: install-cni
+    ready: true
+    restartCount: 0
+    state:
+      terminated:
+        containerID: docker://dbffe73bc7d27a5859bb840d22621472b03c85f9eb12aca94824304c74eef882
+        exitCode: 0
+        finishedAt: "2019-04-25T09:59:37Z"
+        reason: Completed
+        startedAt: "2019-04-25T09:59:37Z"
+  phase: Running
+  podIP: 10.99.44.166
+  qosClass: Burstable
+  startTime: "2019-04-25T09:59:35Z"

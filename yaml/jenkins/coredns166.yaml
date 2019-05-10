@@ -1,0 +1,161 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    cni.projectcalico.org/podIP: 10.244.0.15/32
+  creationTimestamp: "2019-04-25T09:59:35Z"
+  generateName: coredns-fb8b8dccf-
+  labels:
+    k8s-app: kube-dns
+    pod-template-hash: fb8b8dccf
+  name: coredns-fb8b8dccf-6rkgl
+  namespace: kube-system
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ReplicaSet
+    name: coredns-fb8b8dccf
+    uid: d4e8f6c7-6740-11e9-ac80-fa163e515076
+  resourceVersion: "536802"
+  selfLink: /api/v1/namespaces/kube-system/pods/coredns-fb8b8dccf-6rkgl
+  uid: d4ec2a43-6740-11e9-ac80-fa163e515076
+spec:
+  containers:
+  - args:
+    - -conf
+    - /etc/coredns/Corefile
+    image: k8s.gcr.io/coredns:1.3.1
+    imagePullPolicy: IfNotPresent
+    livenessProbe:
+      failureThreshold: 5
+      httpGet:
+        path: /health
+        port: 8080
+        scheme: HTTP
+      initialDelaySeconds: 60
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 5
+    name: coredns
+    ports:
+    - containerPort: 53
+      name: dns
+      protocol: UDP
+    - containerPort: 53
+      name: dns-tcp
+      protocol: TCP
+    - containerPort: 9153
+      name: metrics
+      protocol: TCP
+    readinessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /health
+        port: 8080
+        scheme: HTTP
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 1
+    resources:
+      limits:
+        memory: 170Mi
+      requests:
+        cpu: 100m
+        memory: 70Mi
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        add:
+        - NET_BIND_SERVICE
+        drop:
+        - all
+      procMount: Default
+      readOnlyRootFilesystem: true
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /etc/coredns
+      name: config-volume
+      readOnly: true
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: coredns-token-cbg98
+      readOnly: true
+  dnsPolicy: Default
+  enableServiceLinks: true
+  nodeName: k8s1.novalocal
+  nodeSelector:
+    beta.kubernetes.io/os: linux
+  priority: 2000000000
+  priorityClassName: system-cluster-critical
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: coredns
+  serviceAccountName: coredns
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - key: CriticalAddonsOnly
+    operator: Exists
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/master
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - configMap:
+      defaultMode: 420
+      items:
+      - key: Corefile
+        path: Corefile
+      name: coredns
+    name: config-volume
+  - name: coredns-token-cbg98
+    secret:
+      defaultMode: 420
+      secretName: coredns-token-cbg98
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2019-04-25T09:59:45Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2019-04-30T03:38:31Z"
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2019-04-30T03:38:31Z"
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2019-04-25T09:59:45Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: docker://7cf215f057c6d56106f35f635f3a75f828c2181b8e80d612e4d98d78362379b4
+    image: k8s.gcr.io/coredns:1.3.1
+    imageID: docker-pullable://k8s.gcr.io/coredns@sha256:638adb0319813f2479ba3642bbe37136db8cf363b48fb3eb7dc8db634d8d5a5b
+    lastState:
+      terminated:
+        containerID: docker://1f4abfd157597a3c2795f925bc4d780703e86e7aef47fd16e7409ab8c023c59f
+        exitCode: 2
+        finishedAt: "2019-04-29T05:34:13Z"
+        reason: Error
+        startedAt: "2019-04-29T05:34:13Z"
+    name: coredns
+    ready: true
+    restartCount: 3
+    state:
+      running:
+        startedAt: "2019-04-29T05:34:43Z"
+  hostIP: 10.99.44.166
+  phase: Running
+  podIP: 10.244.0.15
+  qosClass: Burstable
+  startTime: "2019-04-25T09:59:45Z"
